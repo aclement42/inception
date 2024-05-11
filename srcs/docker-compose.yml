@@ -14,6 +14,7 @@ services:
       - SQL_DATABASE=$SQL_DATABASE
       - SQL_USER=$SQL_USER
       - SQL_ROOT_PASSWORD=$SQL_ROOT_PASSWORD
+      - MDB_HOST=$MDB_HOST
     volumes:                        # Voir plus bas
       - mariadb:/var/lib/mysql
     restart: always         # redémarre tant qu'il n'est pas stoppé 
