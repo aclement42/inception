@@ -7,10 +7,11 @@ RUN apt-get upgrade -y
 RUN apt-get install mariadb-server -y
 
 COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
-COPY ./tools/scrypt.sh /root/scrypt.sh
+COPY ./tools/scrypt.sh ./scrypt.sh
 
 #rendre le scrypt executable
-RUN chmod +x /root/scrypt.sh
+RUN chmod +x ./scrypt.sh
+RUN chown root:root ./scrypt.sh
 
 #creation de sous doss pour mysql: stock db dans var/lib/mysql && ecriture socket run/mysqld
 RUN mkdir -p /var/lib/mysql
@@ -22,4 +23,5 @@ RUN chown mysql:mysql /run/mysqld
 RUN chmod 777 /var/lib/mysql
 RUN chmod 777 /run/mysqld
 
-ENTRYPOINT [ "sh", "/root/scrypt.sh" ]
+USER 0:0
+CMD [ "bash", "./scrypt.sh" ]

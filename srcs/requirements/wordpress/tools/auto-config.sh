@@ -1,8 +1,11 @@
-sleep 10
-if [ -f ./wp-config.php ]
-then
-	echo "wordpress already downloaded"
+#!/bin/bash
+
+cd /var/www/html/wordpress
+
+if wp core is-installed --allow-root; then
+	echo "Wordpress is allready installed"
 else
+
     wp config create \
 	--allow-root \
 	--dbname=$SQL_DATABASE \
@@ -27,5 +30,5 @@ else
 	--user_pass=$USER42_PW \
 	--allow-root
 fi
-cd -
-php-fpm7.3 -F
+#cd -
+exec /usr/sbin/php-fpm7.4 -F -R

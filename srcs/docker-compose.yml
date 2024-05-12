@@ -17,14 +17,22 @@ services:
       - MDB_HOST=$MDB_HOST
     volumes:                        # Voir plus bas
       - mariadb:/var/lib/mysql
-    restart: always         # redémarre tant qu'il n'est pas stoppé 
     expose:                         # le port à exposer
       - "3306"
+    healthcheck:
+      test: mysqladmin ping --host=localhost -p${SQL_ROOT_PASSWORD}
+      interval: 5s
+      timeout: 1s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+    #restart: always         # redémarre tant qu'il n'est pas stoppé 
+
 
   nginx:
     container_name: nginx
     volumes:
-      - wordpress:/var/www/wordpress
+      - wordpress:/var/www/html/wordpress
     networks:
       - inception
     depends_on:        			 # Nouvelle ligne, indiquant de ne pas démarrer NGINX tant que WordPress n'a pas démarré.
@@ -41,17 +49,19 @@ services:
     container_name: wordpress
     env_file: .env
     volumes:
-      - wordpress:/var/www/wordpress
+      - wordpress:/var/www/html/wordpress
     networks:
       - inception
     build: 
       context: requirements/wordpress
       dockerfile: Dockerfile
-    depends_on:    					# WordPress démarrera uniquement après MariaDB (sinon il ne pourra pas configurer la base de données...)
-      - mariadb
-    restart: always
     expose: 
       - "9000"
+    depends_on: # WordPress démarrera uniquement après MariaDB (sinon il ne pourra pas configurer la base de données...)
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+    
     
 volumes:
   wordpress:
