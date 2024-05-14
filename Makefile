@@ -1,8 +1,9 @@
+
 all: up
 
 up:
-	@mkdir -p ~/data/mariadb
-	@mkdir -p ~/data/wordpress
+	@mkdir -p /home/ambre/data/mysql
+	@mkdir -p /home/ambre/data/wordpress
 	@docker compose -f srcs/docker-compose.yml up --build
 
 clean: stop
@@ -10,7 +11,7 @@ clean: stop
 
 clear: clean
 	docker volume rm srcs_wordpress srcs_mariadb
-	@rm -rf /home/aclement/data
+	@rm -rf /home/ambre/data
 
 stop:
 	docker compose -f srcs/docker-compose.yml down

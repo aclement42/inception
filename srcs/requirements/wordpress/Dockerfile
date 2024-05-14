@@ -1,37 +1,31 @@
-FROM debian:bullseye
+FROM	debian:bullseye
 
-RUN apt-get update
-RUN apt-get upgrade -y
+RUN		apt-get update && apt-get upgrade -y
 
-RUN apt-get install wget -y \
-    curl
+RUN		apt-get install -y bash
 
-RUN apt-get install -y php7.3\
-	php-fpm\
-	php-mysql\
-	mariadb-client
+RUN		apt-get install -y wget
+RUN		apt-get install -y php7.4 php-fpm php-mysql mariadb-client;
 
-RUN wget https://fr.wordpress.org/wordpress-6.0-fr_FR.tar.gz -P /var/www
+COPY	/conf/php.conf /etc/php/7.4/fpm/pool.d/www.conf
+RUN     mkdir -p /run/php
+RUN     chmod 755 /run/php
 
-RUN cd /var/www && tar -xzf wordpress-6.0-fr_FR.tar.gz && rm wordpress-6.0-fr_FR.tar.gz
+RUN		wget https://fr.wordpress.org/wordpress-6.2-fr_FR.tar.gz -P /var/www
+RUN		cd /var/www && tar -xzf wordpress-6.2-fr_FR.tar.gz && rm wordpress-6.2-fr_FR.tar.gz
+RUN		chmod 755 /var/www/wordpress
 
-RUN	chown -R root:root /var/www/wordpress
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-  && chmod +x wp-cli.phar \
-  && mv wp-cli.phar /usr/local/bin/wp
+COPY	/tools/setup_wordpress.sh /etc/setup_wordpress.sh
 
-COPY ./conf/wdp.conf /etc/php/7.3/fpm/pool.d/
+RUN		chmod +x /etc/setup_wordpress.sh
 
-RUN mkdir /run/php
+RUN		apt-get update && apt-get upgrade -y
+RUN		wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN		chmod +x wp-cli.phar
+RUN		mv wp-cli.phar /usr/local/bin/wp
 
-COPY ./tools/auto-config.sh /var/www/wordpress/auto-config.sh
-RUN chmod +x /var/www/wordpress/auto-config.sh
-ENTRYPOINT ["bash", "/var/www/wordpress/auto-config.sh"]
-#We go the html directory
-WORKDIR /var/www/html/
+EXPOSE	9000
 
-#We expose the 9000 port
-EXPOSE 9000
+WORKDIR /var/www/wordpress
 
-#Launch PHP FPM in foreground and ignore deamonize from conf file (-F)
-CMD ["/usr/sbin/php-fpm7.3", "-F"]
+CMD		["bash", "/etc/setup_wordpress.sh"]
